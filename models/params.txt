@@ -1,0 +1,6 @@
+Logistic regression parameters:
+{'C': 0.1, 'max_iter': 1000, 'penalty': 'l2', 'solver': 'lbfgs'}
+Random forest parameters:
+{'max_depth': 15, 'n_estimators': 200}
+XGBoost parameters:
+{'learning_rate': 0.1, 'max_depth': 3, 'n_estimators': 200, 'use_label_encoder': False, 'verbosity': 0}

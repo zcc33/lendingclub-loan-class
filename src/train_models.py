@@ -45,9 +45,9 @@ if __name__ == "__main__":
     X_train_scaled = StandardScaler().fit_transform(X_train)
     X_test_scaled = StandardScaler().fit_transform(X_test)
 
-    log_params = {}
-    rf_params = {}
-    xgb_params = {}
+    log_params = {'C': 0.1, 'max_iter': 1000, 'penalty': 'l2', 'solver': 'lbfgs'}
+    rf_params = {'max_depth': 15, 'n_estimators': 200}
+    xgb_params = {'learning_rate': 0.1, 'max_depth': 3, 'n_estimators': 200, 'use_label_encoder': False, 'verbosity': 0}
 
     dummy = DummyClassifier(strategy="most_frequent")
     dummy.fit(X_train, y_train)
@@ -59,32 +59,34 @@ if __name__ == "__main__":
     randomforest.fit(X_train, y_train)
 
     xgboost = xgb.XGBClassifier(**xgb_params)
+    xgboost.fit(X_train, y_train)
 
 
     probs = dummy.predict_proba(X_test)[:,1]
     precision_d, recall_d, _ = precision_recall_curve(y_test, probs)
-    metrics["Dummy Classifier"]["PR AUC"] = auc(recall_d, precision_d)
-    metrics["Dummy Classifier"]["ROC AUC"] = roc_auc_score(y_test, probs)
-    metrics["Dummy Classifier"]["Brier loss"] = brier_score_loss(y_test, probs)
+    metrics.loc["Dummy Classifier"]["PR AUC"] = auc(recall_d, precision_d)
+    metrics.loc["Dummy Classifier"]["ROC AUC"] = roc_auc_score(y_test, probs)
+    metrics.loc["Dummy Classifier"]["Brier loss"] = brier_score_loss(y_test, probs)
 
-    probs = logistic.predict_proba(X_test)[:,1]
+    probs = logistic.predict_proba(X_test_scaled)[:,1]
     precision_l, recall_l, _ = precision_recall_curve(y_test, probs)
-    metrics["Logistic Regression"]["PR AUC"] = auc(recall_l, precision_l)
-    metrics["Logistic Regression"]["ROC AUC"] = roc_auc_score(y_test, probs)
-    metrics["Logistic Regression"]["Brier loss"] = brier_score_loss(y_test, probs)
+    metrics.loc["Logistic Regression"]["PR AUC"] = auc(recall_l, precision_l)
+    metrics.loc["Logistic Regression"]["ROC AUC"] = roc_auc_score(y_test, probs)
+    metrics.loc["Logistic Regression"]["Brier loss"] = brier_score_loss(y_test, probs)
 
     probs = randomforest.predict_proba(X_test)[:,1]
     precision_r, recall_r, _ = precision_recall_curve(y_test, probs)
-    metrics["Random Forest"]["PR AUC"] = auc(recall_r, precision_r)
-    metrics["Random Forest"]["ROC AUC"] = roc_auc_score(y_test, probs)
-    metrics["Random Forest"]["Brier loss"] = brier_score_loss(y_test, probs)
+    metrics.loc["Random Forest"]["PR AUC"] = auc(recall_r, precision_r)
+    metrics.loc["Random Forest"]["ROC AUC"] = roc_auc_score(y_test, probs)
+    metrics.loc["Random Forest"]["Brier loss"] = brier_score_loss(y_test, probs)
 
     probs = xgboost.predict_proba(X_test)[:,1]
     precision_x, recall_x, _ = precision_recall_curve(y_test, probs)
-    metrics["XGBoost"]["PR AUC"] = auc(recall_x, precision_x)
-    metrics["XGBoost"]["ROC AUC"] = roc_auc_score(y_test, probs)
-    metrics["XGBoost"]["Brier loss"] = brier_score_loss(y_test, probs)
+    metrics.loc["XGBoost"]["PR AUC"] = auc(recall_x, precision_x)
+    metrics.loc["XGBoost"]["ROC AUC"] = roc_auc_score(y_test, probs)
+    metrics.loc["XGBoost"]["Brier loss"] = brier_score_loss(y_test, probs)
 
+    metrics = metrics.round(3)
     metrics.to_csv("../models/metrics.csv")
 
     plot_pr_curves(recall_d, precision_d, recall_l, precision_l, recall_x, precision_x)

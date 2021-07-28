@@ -26,7 +26,7 @@ def tune_rf(X_train, y_train):
     return(clf.best_params_)
 
 def tune_xgb(X_train, y_train):
-    param = {'n_estimators': [10, 50], 'max_depth': [3, 6, 9], 'learning_rate':[0.1, 0.3], "use_label_encoder": [False], "verbosity": [0]}
+    param = {'n_estimators': [50, 100, 200], 'max_depth': [3, 6, 9], 'learning_rate':[0.1, 0.3], "use_label_encoder": [False], "verbosity": [0]}
     print("Performing grid search cross validation")
     xgb_clf = xgb.XGBClassifier()
     clf = GridSearchCV(xgb_clf, param, scoring = "neg_brier_score", verbose = 3)
