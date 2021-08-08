@@ -2,7 +2,7 @@
 
 ## Table of Contents
 
-1. [Overview](#overview)
+1. [Background](#background)
 2. [Data Description and Processing](#dataset)
 3. [Data Processing](#processing)
 4. [EDA Plots](#eda)
@@ -12,15 +12,25 @@
 9. [Conclusions and Future Work](#future)
 
 
-## Overview <a name ="overview"> </a>
+## Background <a name ="background"> </a>
 
-### Background
 [LendingClub](https://www.lendingclub.com/) is a fin-tech company started in 2006, whose focus is allowing consumers to access financial products using the internet. For most of its history, LendingClub's main product was facilitating unsecured peer-to-peer loans ranging from $1000 to $40,000. At its 2015 peak, LendingClub was the largest peer-to-peer loan platform in the world. At that point, $15.98 billion in loans had been originated through its history. In the fall of 2020, LendingClub ended its peer-to-peer lending program for undisclosed reasons to focus on commercial banking.
 
-### Loan statistics
-As of 2015, according to [Wikipedia](https://en.wikipedia.org/wiki/LendingClub#Loan_performance_statistics), the average LendingClub borrower had a FICO score of 699, a debt-to-income ratio of 17.7%, credit history of 16.2 years, annual personal income of $73,945, and took out a loan of $14,553 for the purpose of debt consolidation or paying off credit cards. LendingClub investors funded $11 billion in loans total, including $2 billion in Q2 2015. The average nominal interest rate was 14%, the default rate was 3.39%, and average net annualized returns was 8.93%.
+As of 2015, according to [Wikipedia](https://en.wikipedia.org/wiki/LendingClub#Loan_performance_statistics), the average LendingClub borrower had the following characteristics:
 
-### Loan Classification
+* FICO score of 699
+* Debt-to-income ratio of 17.7%
+* Credit history of 16.2 years
+* Annual personal income of $73,945
+* Sought out a loan of $14,553 for debt consolidation or paying off credit cards
+
+On the investor side, LendingClub peer investors:
+
+* Funded $11 billion in total loans, including $2 billion in Q2 2015
+* Funded loans with an average nominal interest rate of 14% and default rate of 3.39% 
+* Earned average net annualized returns of 8.93%.
+
+### Project Overview 
 The puprose of 
 
 
