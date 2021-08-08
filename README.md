@@ -1,33 +1,27 @@
-# LendingClub Loan Classification (rough draft - still need to finish)
+# LendingClub Loan Classification
 
 ## Table of Contents
 
-1. [Background about LendingClub](#background)
-2. [Dataset](#dataset)
+1. [Overview](#overview)
+2. [Data Description and Processing](#dataset)
 3. [Data Processing](#processing)
 4. [EDA Plots](#eda)
 5. [Objectives](#objectives)
 7. [Class Imbalance and Scoring](#class)
-8. [Model Results"](#results)
+8. [Model Results](#results)
 9. [Conclusions and Future Work](#future)
 
 
+## Overview <a name ="overview"> </a>
 
-## Background about LendingClub <a name ="background"> </a>
-LendingClub is a fin-tech company that started in 2006, allowing consumers to access financial products using the internet.
+### Background
+[LendingClub](https://www.lendingclub.com/) is a fin-tech company started in 2006, whose focus is allowing consumers to access financial products using the internet. For most of its history, LendingClub's main product was facilitating unsecured peer-to-peer loans ranging from $1000 to $40,000. At its 2015 peak, LendingClub was the largest peer-to-peer loan platform in the world. At that point, $15.98 billion in loans had been originated through its history. In the fall of 2020, LendingClub ended its peer-to-peer lending program for undisclosed reasons to focus on commercial banking.
 
-For most of its history, its main product was facilitating unsecured peer-to-peer loans from $1000 to $40,000.
+### Loan statistics
+As of 2015, according to [Wikipedia](https://en.wikipedia.org/wiki/LendingClub#Loan_performance_statistics), the average LendingClub borrower had a FICO score of 699, a debt-to-income ratio of 17.7%, credit history of 16.2 years, annual personal income of $73,945, and took out a loan of $14,553 for the purpose of debt consolidation or paying off credit cards. LendingClub investors funded $11 billion in loans total, including $2 billion in Q2 2015. The average nominal interest rate was 14%, the default rate was 3.39%, and average net annualized returns was 8.93%.
 
-At its peak in 2015, LendingClub was the largest peer-to-peer loan platform in the world. At that point, $15.98 billion in loans had been originated throughout its history.
-
-In the fall of 2020, LendingClub ended its peer-to-peer lending program (for undisclosed reasons) to focus on commercial banking.
-
-### Loan Statistics (up to 2015)
-
-The average borrower had a FICO score of 699, 17.7% debt-to-income, 16.2 years credit history, $73,945 personal income, and takes $14,553 loan for debt consolidation / paying off credit cards.
-
-On the investor side, there were $11 billion loans funded total, with $2 billion in Q2 2015.
-The nominal average interest rate was 14%, the default rate was 3.39%, and average net annualized returns was 8.93%.
+### Loan Classification
+The puprose of 
 
 
 ## Description of Data <a name ="dataset"> </a>
