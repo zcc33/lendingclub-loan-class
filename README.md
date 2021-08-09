@@ -163,43 +163,42 @@ Remarkably, our models seem to perform roughly the same. XGBoost performs slight
 
 Overall, the performance of our models is  poor. This is likely because we are training on the set of loans that LendingClub had already accepted. If recall is the desired metric, to have a recall of 0.8, we would suffer a precision of only 0.2. However, there may be certain contexts where this is acceptable. From an investor's standpoint, any edge over baseline is desirable. 
 
-Compared to baseline, each of our models performs better than the dummy classifier going by their respective Brier loss. The dummy classfier's PR AUC of 0.577 is misleading, hohwever, as the dummy only exists at two points along the Precision-Recall curve: it either has a perfect precision and a recall of close to 0, or a perfect recall and a precision of close to 0, neither of which is desirable from a practical standpoint.
+Compared to baseline, each of our models performs better than the dummy classifier if going by their respective Brier loss. The dummy classfier's PR AUC of 0.577 is misleading, however, as the dummy only exists at two points along the Precision-Recall curve: it either has a perfect precision and a recall of close to 0, or a perfect recall and a precision of close to 0, neither of which is desirable from a practical standpoint.
 
 ## Feature Importance <a name ="feature"> </a>
 
-There are many ways of measuring feature importance, and 
+There are many ways of measuring feature importance. For logistic regression, we used the magnitude of a variable's coefficient value. For XGBoost and random forest, we used the built-in feature importance attribute, which bases its importance attribution on the Gini impurity reduction that a feature brings.
 
 ![](img/feature_importances.jpg)
 
+Common to all models, interest rate is the most important feature. Other top features that are shared among models include: dti (debt-to-income ratio), grade, annual_inc (annual income), total_il_high_credit_limit (total installment high credit limit), and FICO score. See the [data dictionary](https://resources.lendingclub.com/LCDataDictionary.xlsx) for variable names and descriptions.
+
+Two caveats: some of the variables such as total_il_high_credit may be data leakage, depending on when the variable was recorded. Also, these feature importance metrics don't do well with categorical variables, which are split across many dummy variables. For example, the importance of borrower's state gets diluted across 50 dummy variables. For those, a permutation-based method might be more accurate.
+
+## Running the Code <a name ="guide"> </a>
+
+To reproduce our results, first clone the repo. Next download the LendingClub loans dataset from the [kaggle source](https://www.kaggle.com/wordsforthewise/lending-club). Unzip it into the `/data` folder. It should be a 1.68 GB file called `accepted_2007_to_2018Q4.csv`. It was not included in the GitHub repository because of size restrictions. Then:
+
+1. Run `get_data.py` to subset the data from the years we want (2012 to 2013) and drop leaky or irrelevant columns. The resulting Pandas Dataframe will get saved in the `/data` folder as `data.pkl`.
+2. Run `make_figs.py` to make the exploratory plots using the `data.pkl` saved previously.
+3. The `clean_data.py` function finishes cleaning and processing `data.pkl`, returning the final X and y dataframes. It doesn't need to be called separately but is imported into the files for model usage.
+4. Run `tune_models.py` to perform grid search cross-validation on a train-test split. The parameter ranges can be manually tweaked. The best parameter sets are recorded in `models/params.txt`.
+5. Run `train_models.py` to train models using the final parameters. It saves the models as, e.g., `/models/logistic.sav`, records scoring metrics in `/models/metrics.csv`.
+6. Run `feature_importances.py` to load all the saved models and rank the Top 15 important features for each.
+
 ## Conclusions and Future Work <a name ="future"> </a>
 
-Surprisingly poor performance despite strong variables (grade, FICO score, interest rate).
+Our 3 models (Logistic Regression, Random Forest, and XGBoost) all performed similarly, with XGBoost doing slightly better than the rest. XGBoost had a PR AUC of 0.291. The poor performance was surprising given that the models trained on seemingly strong predictors (grade, FICO score, interest rate). On the other hand, training was done on loans that were already accepted by LendingClub, so it's hard to distinguish them further.
 
-Just as an example, to get a recall of 0.8, we would have precision of only 0.2.
+Our models could be used by investors looking to find loans that have the lowest chance of being charged off. With many loans to choose from and only a limited amount of money to invest, it costs very little to pass over a good loan. So precision does not have to be great. On the other hand, investing in a single bad loan could be disastrous, so recall is very important. Our models can offer a recall of 0.8 with a precision of 0.2. This is better than baseline and at least offers an edge over randomly choosing loans.
 
-All models (logistic, random forest, xgboost) performed similarly.
+Our proposals for future work:
 
-Possibly because we are training on loans that were already accepted by LendingClub, so hard to discriminate them further based on variables that LendingClub already used.
-
-Future work could be to train on other targets, like profitability. Also quantify how much better our model does than random in terms of profitability for an investor.
-
-Potential targets:
-
-**Predict charge-off rates                  (classification task)**
-
-Predict whether loan was profitable     (classification task)
-
-Predict return (%) from loan             (regression task)
+1. Investigate the poor model performance. Does it make sense given  our exploratory plots?
+2. While we performed a classification task of predicting charge-off rates, in a business sense the investor doesn't necessarily care about charge-off rates if they are properly compensated by collecting a higher interest rate. So, switch to a regression task of predicting a loan's ROI. 
+3. Use permutation methods and Shapley values to better explain feature importances.
 
 
-
-Candidate models (for classification):
-
--Logistic regression
-
--Random forest
-
--XGBoost (gradient boosted trees)
 ## References
 
 1. https://www.kaggle.com/wordsforthewise/lending-club
