@@ -6,10 +6,10 @@
 2. [Project Overview](#overview)
 3. [Target and Predictors](#target)
 4. [Data Processing](#processing)
-5. [EDA Plots](#eda)
+5. [Exploratory Plots](#eda)
 6. [Class Imbalance and Scoring](#class)
 7. [Model Results](#results)
-8. [Feature Importance](#objectives)
+8. [Feature Importance](#feature)
 9. [Running the Code](#guide)
 10. [Conclusions and Future Work](#future)
 
@@ -73,59 +73,46 @@ The remaining preddictors, we are confident would be availble to us in a real-wo
 We processed the data as follows:
 
 1. **Dask and memory management** - The full data set was too large to fit into memory, so we used dask to parallelize the loading and dropping of rows and columns. Then we employed memory management with dtypes to optimize speed for the resulting Pandas dataframe.
-2. **Categorical and ordinal data** - We found that all of the ordinal variables could naturally be converted to numeric. For example, A-F grades could be turned into 0-6. Then we introduced dummys for each of the categorical variables. State was the largest one, needing 49 dummy variables.
+2. **Categorical and ordinal data** - We found that all of the ordinal variables could naturally be converted to numeric. For example, A-G grades could be turned into 0-7. Then we introduced dummys for each of the categorical variables. State was the largest one, needing 49 dummy variables.
 3. **Dealing with missing values** - Since we had such a large number of predictors to work with, we dropped all predictors that had over 10% of its values missing. We also dropped rows that had any missing values, since there was so few. We checked that this had negligible impact on the target variable.
 
 ### Final Dataset
 * X shape: `(152,069, 104)`
 
-* 152,069 loans from 2012 to 2013. 
+* 152,069 loans from 2012 to 2013
 
-* 15.4% were Charged-Off (target label 1)
+* 15.4% were Charged-Off (Y label 1)
 
-* 84.6% were Fully Paid (target label 0)
+* 84.6% were Fully Paid (Y label 0)
 
 * ~40 predictors, with dummy variables bringing the number of columns to 104
 
 
 
-## EDA Plots <a name ="eda"> </a>
-To explore our data and investigate potentially useful features, we made plots of 
+## Exploratory Plots <a name ="eda"> </a>
+To explore our data and see if we can anticipate useful features, we plotted the distribution of several variables individually, and also by their charge-off rates.
+
+On the left-hand figure below, we had to remove a few extreme outliers and take the logarithm to get the annual income on the same graph. On the right, we see that borrowers with Fully Paid loans had slightly higher income than borrowers whose loans were Charged Off.
 
 ![](img/Log%20Annual%20Income.jpg)
+
+On the left, we see that FICO scores are mostly between 675 and 750, and have a hard minimum of arorund 650. On the right, we see that Fully Paid loans tended to have higher FICO scores than Charged Off loans, as one would expect.
+
 ![](img/FICO%20score.jpg)
+
+On the left, we see the number of borrowers for each indidividual state. California, New York, and Texas have the most borrowers. On the right, all the states seem to have remarkably similar charge-off rates. The three exceptions are Mississippi, Nebraska, and Idaho, which all have a very small number of borrowers.
+
 ![](img/Borrower%20State.jpg)
+
+On the left, most loans are categorized as B or C, with very few loans getting below a D. On the right, charge-off rates climb steadily as the grade gets worse. Based on this chart, we expect grade to be an important predictor of charge-off status.
+
 ![](img/Loan%20Grades.jpg)
 
 
-
-## Objectives <a name ="objectives"> </a>
-Potential targets:
-
-**Predict charge-off rates                  (classification task)**
-
-Predict whether loan was profitable     (classification task)
-
-Predict return (%) from loan             (regression task)
-
-
-
-Candidate models (for classification):
-
--Logistic regression
-
--Random forest
-
--XGBoost (gradient boosted trees)
-
-
-
-
 ## Class Imbalance and Scoring <a name ="class"> </a>
-15% vs 85% imbalance
+We wanted to address the class imbalance and decide on relevant scoring metrics before training our models. Our class imbalance is roughly 85% in the majority class (Fully Paid), and 15% in the minority class (Charged Off). 
 
-However:
-There are much worse cases out there (1% vs 99%)
+However, there are much worse cases out there (1% vs 99%)
 There is a sufficient number of the minority class (tens of thousands)
 The class imbalance also exists in the population
 
@@ -163,6 +150,8 @@ A random 50/50 model would have a Brier loss of 0.25.
 
 ![](img/pr_curve.jpg)
 
+## Feature Importance <a name ="feature"> </a>
+![](img/feature_importances.jpg)
 
 ## Conclusions and Future Work <a name ="future"> </a>
 
@@ -175,6 +164,24 @@ All models (logistic, random forest, xgboost) performed similarly.
 Possibly because we are training on loans that were already accepted by LendingClub, so hard to discriminate them further based on variables that LendingClub already used.
 
 Future work could be to train on other targets, like profitability. Also quantify how much better our model does than random in terms of profitability for an investor.
+
+Potential targets:
+
+**Predict charge-off rates                  (classification task)**
+
+Predict whether loan was profitable     (classification task)
+
+Predict return (%) from loan             (regression task)
+
+
+
+Candidate models (for classification):
+
+-Logistic regression
+
+-Random forest
+
+-XGBoost (gradient boosted trees)
 ## References
 
 1. https://www.kaggle.com/wordsforthewise/lending-club
