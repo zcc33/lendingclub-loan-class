@@ -23,7 +23,7 @@ if __name__ == "__main__":
     top10_coefs_x = xgboost.feature_importances_[np.argsort(xgboost.feature_importances_)][::-1][:15]
     top10_names_x = X.columns[np.argsort(xgboost.feature_importances_)][::-1][:15]
 
-    fig, axs = plt.subplots(1,3, figsize = (15,5), constrained_layout=True, dpi=300)
+    fig, axs = plt.subplots(3,1, figsize=(10,15), dpi=200, constrained_layout=True)
 
     sns.barplot(x=top10_coefs_l, y=top10_names_l, ax = axs[0])
     axs[0].set_title("Logistic Regression Top 15 Features", fontsize = 14)
