@@ -16,6 +16,8 @@
 
 ## Background <a name ="background"> </a>
 
+![](img/lc-logo.png)
+
 [LendingClub](https://www.lendingclub.com/) is a fin-tech company started in 2006, whose focus is allowing consumers to access financial products using the internet. For most of its history, LendingClub's main product was facilitating unsecured peer-to-peer loans ranging from $1000 to $40,000. At its 2015 peak, LendingClub was the largest peer-to-peer loan platform in the world. At that point, $15.98 billion in loans had been originated through its history. In the fall of 2020, LendingClub ended its peer-to-peer lending program for undisclosed reasons to focus on commercial banking.
 
 As of 2015, according to [Wikipedia](https://en.wikipedia.org/wiki/LendingClub#Loan_performance_statistics), the average LendingClub borrower had the following characteristics:
@@ -34,13 +36,13 @@ On the investor side, LendingClub peer investors:
 
 ## Project Overview <a name ="overview"> </a>
 ### The Classification Task
-While LendingClub boasted a default rate of 3.39%, a much higher percentage of its loans were categorized as "charged off." This means that the loan was unlikely to be fully paid, and therefore it had been sold to a third-party collections agency. As a potential investor seeking to maximize returns, it would be helpful to predict ahead of time whether a loan would be charged off or not. In this project, we built classification models using Logistic Regression, Random Forest, and XGBoost to predict charge-off status. 
+While LendingClub boasted a default rate of 3.39%, a much higher percentage of its loans were categorized as "charged off." This means that the loan was unlikely to be fully paid, and therefore it had been sold to a third-party collections agency. As a potential investor seeking to maximize returns, it would be usueful to predict ahead of time whether a loan would be charged off or not. In this project, we trained classification models using Logistic Regression, Random Forest, and XGBoost to predict charge-off status. 
 
 ### Dataset Description
 
 The dataset we used contains over 2 million loans, with over 150 variables, spanning 2012 through 2018. A link to the dataset can be downloaded [here](https://www.kaggle.com/wordsforthewise/lending-club), and the official data dictionary for it can be downloaded [here](https://resources.lendingclub.com/LCDataDictionary.xlsx).
 
-LendingClub periodically released its loan information on their website, but has since discontinued the practice. We used the most comprehensive LendingClub dataset we could find, which was scraped from the LendingClub website, agglomerated, and made available on [Kaggle](https://www.kaggle.com/wordsforthewise/lending-club). The dataset was described as loans from 2007 to 2018, but we only found loans from 2012 to 2018. Although LendingClub no longer provides formal support for its dataset online, we found a [data dictionary](https://resources.lendingclub.com/LCDataDictionary.xlsx) on their website that describes each of the variables.
+LendingClub periodically released its loan information on their website, but has since discontinued the practice. We used the most comprehensive LendingClub dataset we could find, which was scraped from the LendingClub website, agglomerated, and made available on [Kaggle](https://www.kaggle.com/wordsforthewise/lending-club). The dataset was described as loans from 2007 to 2018, but we only found loans from 2012 to 2018. Although LendingClub no longer provides support for its dataset online, we found a [data dictionary](https://resources.lendingclub.com/LCDataDictionary.xlsx) on their website that describes each of the variables.
 
 
 ### Purpose
@@ -68,39 +70,27 @@ The remaining preddictors, we are confident would be availble to us in a real-wo
 
 ## Data Processing <a name ="processing"> </a>
 
-Our 
+We processed the data as follows:
 
-> Challenge 1: Too large to load
-
--Leveraged dask to load the full dataset and then drop columns.
-
--Performed memory management with dtypes to optimize pandas speed.
-
--Challenge 2: Categorical & ordinal data
-
--Converted ordinal values to numeric. For example, grade and length of employment.
-
-Some categorical variables needed 50+ dummies (like state).
-
-Challenge 3: Missing values
-
--Filtered out columns with greater than 10% missing values.
-
--Dropped rows with any missing values (checked to see this didn’t alter target variable much).
+1. **Dask and memory management** - The full data set was too large to fit into memory, so we used dask to parallelize the loading and dropping of rows and columns. Then we employed memory management with dtypes to optimize speed for the resulting Pandas dataframe.
+2. **Categorical and ordinal data** - We found that all of the ordinal variables could naturally be converted to numeric. For example, A-F grades could be turned into 0-6. Then we introduced dummys for each of the categorical variables. State was the largest one, needing 49 dummy variables.
+3. **Dealing with missing values** - Since we had such a large number of predictors to work with, we dropped all predictors that had over 10% of its values missing. We also dropped rows that had any missing values, since there was so few. We checked that this had negligible impact on the target variable.
 
 ### Final Dataset
-Shape: (152,069, 104)
+* X shape: `(152,069, 104)`
 
-152,069 loans from 2012 to 2013:
-    15.4% charged-off (label 1)
-    84.6% fully paid (label 0)
+* 152,069 loans from 2012 to 2013. 
 
-~40 predictor variables, with dummy categories bringing columns to 104
+* 15.4% were Charged-Off (target label 1)
+
+* 84.6% were Fully Paid (target label 0)
+
+* ~40 predictors, with dummy variables bringing the number of columns to 104
 
 
 
 ## EDA Plots <a name ="eda"> </a>
-
+To explore our data and investigate potentially useful features, we made plots of 
 
 ![](img/Log%20Annual%20Income.jpg)
 ![](img/FICO%20score.jpg)
