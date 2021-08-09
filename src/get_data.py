@@ -24,12 +24,12 @@ def make_paid_figure(data):
     sns.barplot(data=temp, x="year", y="num_loans", ax = axs[0])
     axs[0].set_title("Total non-Current Loans", fontsize = 16)
     axs[0].set_ylabel("Loans")
-    axs[0].set_xlabel("Year")
+    axs[0].set_xlabel("Year Issued")
 
     sns.lineplot(data=temp, x="year", y="percent_paidoff", linewidth= 3, ax = axs[1])
     axs[1].set_title("Percentage of non-Current Loans that are Fully Paid", fontsize = 16)
     axs[1].set_ylabel("Fully Paid (%)")
-    axs[1].set_xlabel("Year")
+    axs[1].set_xlabel("Year Issued")
     axs[1].set(ylim=(65, 90))
     plt.tight_layout()
 

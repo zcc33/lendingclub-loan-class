@@ -1,15 +1,17 @@
-# LendingClub Loan Classification
+# LendingClub Loan Classification 
 
 ## Table of Contents
 
 1. [Background](#background)
-2. [Data Description and Processing](#dataset)
-3. [Data Processing](#processing)
-4. [EDA Plots](#eda)
-5. [Objectives](#objectives)
-7. [Class Imbalance and Scoring](#class)
-8. [Model Results](#results)
-9. [Conclusions and Future Work](#future)
+2. [Project Overview](#overview)
+3. [Target and Predictors](#target)
+4. [Data Processing](#processing)
+5. [EDA Plots](#eda)
+6. [Class Imbalance and Scoring](#class)
+7. [Model Results](#results)
+8. [Feature Importance](#objectives)
+9. [Running the Code](#guide)
+10. [Conclusions and Future Work](#future)
 
 
 ## Background <a name ="background"> </a>
@@ -30,32 +32,45 @@ On the investor side, LendingClub peer investors:
 * Funded loans with an average nominal interest rate of 14% and default rate of 3.39% 
 * Earned average net annualized returns of 8.93%.
 
-### Project Overview 
-The puprose of 
+## Project Overview <a name ="overview"> </a>
+### The Classification Task
+While LendingClub boasted a default rate of 3.39%, a much higher percentage of its loans were categorized as "charged off." This means that the loan was unlikely to be fully paid, and therefore it had been sold to a third-party collections agency. As a potential investor seeking to maximize returns, it would be helpful to predict ahead of time whether a loan would be charged off or not. In this project, we built classification models using Logistic Regression, Random Forest, and XGBoost to predict charge-off status. 
+
+### Dataset Description
+
+The dataset we used contains over 2 million loans, with over 150 variables, spanning 2012 through 2018. A link to the dataset can be downloaded [here](https://www.kaggle.com/wordsforthewise/lending-club), and the official data dictionary for it can be downloaded [here](https://resources.lendingclub.com/LCDataDictionary.xlsx).
+
+LendingClub periodically released its loan information on their website, but has since discontinued the practice. We used the most comprehensive LendingClub dataset we could find, which was scraped from the LendingClub website, agglomerated, and made available on [Kaggle](https://www.kaggle.com/wordsforthewise/lending-club). The dataset was described as loans from 2007 to 2018, but we only found loans from 2012 to 2018. Although LendingClub no longer provides formal support for its dataset online, we found a [data dictionary](https://resources.lendingclub.com/LCDataDictionary.xlsx) on their website that describes each of the variables.
 
 
-## Description of Data <a name ="dataset"> </a>
+### Purpose
+The full dataset was only available for accepted loans, so we could only build models on loans that were accepted by LendingClub. We should clarify that this is a very different task than if we could build models on all loan applications. For the latter, it would be much easier to distinguish between good and bad loans, and such a classifier would be used as a primary filter, for example by LendingClub itself. What we have instead, is to build models classifying on the "good" loans that LendingClub deemed worthy of acceptance. This is a much harder task, so we expect performance to be much worse. A potential use would be, for example, as a secondary filter deployed by one of LendingClub's peer investors seeking any additional edge (over picking at random) to maximize their returns. 
 
-We used the most comprehensive LendingClub dataset available. It’s described as all loans from 2007 to 2018, but actually only contains 2012 to 2018.
+## Target and Predictors <a name ="target"> </a>
+### Selecting only loans from 2012 and 2013
+Our target variable, `loan_status`, had three main values: `{Charged Off, Fully Paid, Current}`. We merged the much smaller proportions of late or defaulted loans with the Charged-Off category. Since we want to predict if a loan will be Charged Off or Fully Paid upon completion, we can't include loans whose status is Current. We couldn't select all the non-Current loans either, as that biases towards loans that get ended early. 
 
-LendingClub no longer offers data or information about loans on its website.
+LendingClub loans had a term of 3 or 5 years, so we probably need to filter out all loans issued within 5 years of when the dataset was collected (2018). We created the following figure characterizing completed (or non-Current) loans by issuance year:
 
-The data set contains over 2 million loans, over 150 variables.
-
-Since variables are only available for accepted loans, we can only build models on loans that were accepted by LendingClub. This is a very different task than if we could build models on all loan applications. 
-
-Target variable: Loan Status {“Current”, “Fully Paid”, “Charged Off”}
-
-Seemingly useful predictors: FICO score, grade, interest rate, annual income, employee length, and many others
-
-Need to prevent data leakage! ---> Filter out the variables collected after loan origination
-
-### Distribution of non-current Loans
 ![](img/paid_off.jpg)
 
+In the chart on the left, we see that completed loans issued from 2012 through 2015 increased dramatically, corresponding to LendingClub's general rise in popularity. 
+
+On the right, we see that the percentage of completed loans which are Fully Paid remains stable for 2012 and 2013, for which all loans have naturally matured, but then steadily declines. This confirms our suspicion that prematurely ended loans (those from 2014 and onwards) are biased in a certain direction. 
+
+Therefore, we had to filter out the vast majority of our dataset, and select only loans from 2012 and 2013.
+
+### Dropping predictors to prevent data leakage
+
+Many of the features we had available in our dataset were collected after loan issuance. Some of them were directly related to loan payments, or absence thereof. Others were redundant with having a charged-off loan, such as drops in credit score or decreases in borrowing limits. There was a lot of potential for data leakage, so we went through the data dictionary and dropped all predictors which were possibly collected after loan issuance.
+
+The remaining preddictors, we are confident would be availble to us in a real-world setting. Useful ones include FICO score, grade (given by LendingClub), interest rate (assigned by LendingClub), annual income, employee length, state, debt-to-income ratio, and others. We briefly considered whether grade and interest rate, since they are reflective of charge-off probability, might be considered data leakage, but as we stated above the purpose is to build a classifier on top of information provided by LendingClub, which could be used by an individual investor.
 
 ## Data Processing <a name ="processing"> </a>
-Challenge 1: Too large to load
+
+Our 
+
+> Challenge 1: Too large to load
 
 -Leveraged dask to load the full dataset and then drop columns.
 
