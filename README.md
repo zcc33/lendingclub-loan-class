@@ -8,7 +8,7 @@
 4. [Data Processing](#processing)
 5. [Exploratory Plots](#eda)
 6. [Class Imbalance and Scoring](#class)
-7. [Model Results](#results)
+7. [Model Tuning and Results](#results)
 8. [Feature Importance](#feature)
 9. [Running the Code](#guide)
 10. [Conclusions and Future Work](#future)
@@ -110,47 +110,65 @@ On the left, most loans are categorized as B or C, with very few loans getting b
 
 
 ## Class Imbalance and Scoring <a name ="class"> </a>
-We wanted to address the class imbalance and decide on relevant scoring metrics before training our models. Our class imbalance is roughly 85% in the majority class (Fully Paid), and 15% in the minority class (Charged Off). 
+Our class imbalance is roughly 85% in the majority class (Fully Paid), and 15% in the minority class (Charged Off). This will cause our models to want to classify everything as the majority class.
 
-However, there are much worse cases out there (1% vs 99%)
-There is a sufficient number of the minority class (tens of thousands)
-The class imbalance also exists in the population
-
-We could: undersample majority class, make synthetic data from minority class (SMOTE), use “class_weight = balanced” in model loss functions
-
-Models will want to predict everything is in the 85% group (Fully Paid). This simply depends on the threshold used.
-
-### Scoring metric
-If we use threshold-agnostic metrics to evaluate our models, class imbalance shouldn’t be a problem. E.g. ROC AUC, brier score
-
-Accuracy, recall, and precision all depend on the threshold used.
+After doing some research, we realized the class imbalance is not as bad as previously thought. There are much worse cases out there (99% vs 1%), and in our case there is a sufficient number of minority class (tens of thousands of Charged Off loans) for the classifier to learn from. What's more, the class imbalance exists in the population. While we could employ techniques such as undersampling the majority class or making synthetic data from the minority class (SMOTE), we decided to simply adjust the threshold for classification after training, and evaluate our models using scoring metrics which ignore the classification threshold.
 
 
+### Scoring metrics
 
-ROC AUC is threshold-agnostic and gives more nuanced information about the model. Since the data is imbalanced, better to use Precision-Recall AUC.
+Depending on the business context, recall could be more important than precision, or vice versa. Here it seems recall is more important. From the perspective of an investor, it is fine to miss out on a good loan, whereas it would be very costly to invest in a bad loan. 
+
+With our class imbalance, we want to use threshold-agnostic metrics to evaluate our models. Accuracy, recall, and precision all depend on the particular threshold used. ROC AUC is threshold-agnostic and gives more nuanced information about the model. For a more relevant interpretation, we decided to also use Precision-Recall AUC.
+
+> Scoring metric 1: PR AUC
+
+> Scoring metric 2: ROC AUC
 
 
+Another threshold-agnostic scoring metric is called [Brier loss](https://en.wikipedia.org/wiki/Brier_score). It uses the direct probabilities given by the model and is defined as the mean squared error between target outcome and predicted probability. Brier loss ranges from 0 (good) to 1 (bad). A random 50/50 model would have a Brier loss of 0.25.
 
-Brier loss is also threshold-agnostic. It uses the direct probabilities given by the model. It’s the mean squared error between target outcome and predicted probability.
-
-Brier loss ranges from 0 (good) to 1 (bad). 
-
-A random 50/50 model would have a Brier loss of 0.25.
+> Scoring metric 3: Brier loss
 
 
-## Model Results <a name ="model"> </a>
+## Model Tuning and Results <a name ="model"> </a>
 
-|  | Configuration | Train Scores | Test Scores
+Our candidate models were Logistic Regression, Random Forest, and XGBoost (a gradient-boosted tree model). These were compared against a dummy classifier, which always predicts the majority. We performed grid-search cross-validation to tune our models.
+
+### Logistic regression parameters:
+
+`{'C': 0.1, 'max_iter': 1000, 'penalty': 'l2', 'solver': 'lbfgs'}`
+
+### Random forest parameters:
+`{'max_depth': 15, 'n_estimators': 200}`
+
+### XGBoost parameters:
+`{'learning_rate': 0.1, 'max_depth': 3, 'n_estimators': 200, 'use_label_encoder': False, 'verbosity': 0}`
+
+We performed a usual train-test split of 75-25%. After training each model with their optimal hyper-parameters, we evaluated their performance on the same test set. Here are the results:
+
+|  | PR AUC | ROC AUC | Brier loss
 | --- | ---| --- | ---|
-| Dummy classifier (majority) | Gives perfect probability of <br> being majority class | n/a | PR AUC: 0.577 <br> Brier loss: 0.154 <br> ROC AUC: 0.5 <br>
-| Logistic Regression | Standardized data <br> Default regularization <br> Max_iter = 1000 | PR AUC: 0.290 <br> Brier loss: 0.121 <br> ROC AUC: 0.7 | PR AUC: 0.291 <br> Brier loss: 0.121 <br> ROC AUC: 0.7
-| Random Forest | max_depth = 6 <br> n_estimators = 20 | PR AUC: 0.294 <br> Brier loss: 0.123 <br> ROC AUC: 0.698 | PR AUC: 0.279 <br> Brier loss: 0.123 <br> ROC AUC: 0.689
-| XGBoost | max_depth = 5 <br> n_estimators = 10 <br> eta (learning rate) = 0.1 | PR AUC: 0.289 <br> Brier loss: 0.138 <br> ROC AUC: 0.696 | PR AUC: 0.28 <br> Brier loss: 0.138 <br> ROC AUC: 0.689
+| Dummy classifier  | 0.577| 0.5 | 0.154 |
+| Logistic Regression | 0.289 |  0.699| 0.122 |
+| Random Forest |  0.284 |  0.695 | 0.122 |
+| XGBoost | 0.291 | 0.7 |  0.121 |
+
+To better illustrate the trade-off between precision and recall, we plotted the Precision-Recurve curves for each of our models:
 
 
 ![](img/pr_curve.jpg)
 
+Remarkably, our models seem to perform roughly the same. XGBoost performs slightly better than the rest with a PR AUC of 0.291. 
+
+Overall, the performance of our models is  poor. This is likely because we are training on the set of loans that LendingClub had already accepted. If recall is the desired metric, to have a recall of 0.8, we would suffer a precision of only 0.2. However, there may be certain contexts where this is acceptable. From an investor's standpoint, any edge over baseline is desirable. 
+
+Compared to baseline, each of our models performs better than the dummy classifier going by their respective Brier loss. The dummy classfier's PR AUC of 0.577 is misleading, hohwever, as the dummy only exists at two points along the Precision-Recall curve: it either has a perfect precision and a recall of close to 0, or a perfect recall and a precision of close to 0, neither of which is desirable from a practical standpoint.
+
 ## Feature Importance <a name ="feature"> </a>
+
+There are many ways of measuring feature importance, and 
+
 ![](img/feature_importances.jpg)
 
 ## Conclusions and Future Work <a name ="future"> </a>
@@ -187,3 +205,4 @@ Candidate models (for classification):
 1. https://www.kaggle.com/wordsforthewise/lending-club
 2. https://en.wikipedia.org/wiki/LendingClub
 3. https://resources.lendingclub.com/LCDataDictionary.xlsx
+4. https://en.wikipedia.org/wiki/Brier_score
